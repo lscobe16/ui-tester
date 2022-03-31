@@ -71,7 +71,7 @@ function pipeAndLog(from: Deno.Reader, to: Deno.Writer & Deno.Closer,
 
 export async function coupleExpecter(subjectArgs: string, testFile: string) {
     // FEATURE: use command line arguments from the test file
-    return await couple(subjectArgs, `deno run --allow-read ${EXPECT_SCRIPT} ${testFile}`);
+    return await couple(subjectArgs, `deno run --allow-read ${EXPECT_SCRIPT} "${testFile}"`);
 }
 
 export async function couple(subjectArgs: string, testerArgs: string) {

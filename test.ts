@@ -88,7 +88,7 @@ if (command === "run") {
 
 async function test(filename: string) {
     const coupler = runner(
-        `deno run --allow-run --allow-read ${COUPLER_SCRIPT} --subject "${argv.subject!}" --expect ${filename}`,
+        `deno run --allow-run --allow-read ${COUPLER_SCRIPT} --subject "${argv.subject!}" --expect "${filename}"`,
     true);
     
     // for some (inexplicable) reason order matters here: first await the output
