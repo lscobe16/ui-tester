@@ -74,10 +74,18 @@ if (argv.dir) {
     files = [argv.file];
 }
 
+// time logging
+const times: number[] = [];
+const tableWidth = Math.max(30, ...files.map(f => basename(f).length));
+
 if (command === "run") {
-    console.log("test".padEnd(30), "result")
-    console.log("-".repeat(30), "-------")
-    files.forEach(test);
+    console.log("test".padEnd(tableWidth), "result");
+    console.log("-".repeat(tableWidth), "-------");
+    console.time("total time");
+    await Promise.allSettled(files.map(test));
+    console.log();
+    console.timeEnd("total time");
+    console.log(`average time per test: ${Math.round(times.reduce((a, b) => a + b) / times.length)}ms`)
 } else if (command === "split") {
     files.forEach(split);
 } else if (command === "generalize") {
@@ -87,6 +95,7 @@ if (command === "run") {
 // FEATURE: allow to run against testers
 
 async function test(filename: string) {
+    const begin = new Date().getTime();
     const coupler = runner(
         `deno run --allow-run --allow-read ${COUPLER_SCRIPT} --subject "${argv.subject!}" --expect "${filename}"`,
     true);
@@ -94,20 +103,20 @@ async function test(filename: string) {
     // for some (inexplicable) reason order matters here: first await the output
     const out = decoder.decode(await coupler.output());
     const err = decoder.decode(await coupler.stderrOutput());
-    const out = decoder.decode(await coupler.output());
+    
+    times.push(new Date().getTime() - begin);
     
     if ((await coupler.status()).success) {
-        console.log(basename(filename).padEnd(30), "success");
+        console.log(basename(filename).padEnd(tableWidth), "success");
     } else {
         const logfile = replaceExtension(filename, ".failed.log");
-        console.log(basename(filename).padEnd(30), `fail (see ${basename(logfile)})`);
+        console.log(basename(filename).padEnd(tableWidth), `fail (see ${basename(logfile)})`);
 
-        Deno.writeTextFile(logfile, out).then(() =>
-            console.log(`wrote a log of the actual output to ${basename(logfile)}`)
-        );
+        await Deno.writeTextFile(logfile, out);
+        console.log("\t" + `wrote a log of the actual output to ${basename(logfile)}`);
 
         // FEATURE: extract mismatches instead
-        console.log(err);
+        console.log("\t" + err.replaceAll("\n", "\n\t"));
     }
 }
 
