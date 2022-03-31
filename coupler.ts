@@ -37,7 +37,7 @@ if (import.meta.main) {
         .help()
         .parse();
 
-    let success: boolean = true;
+    let success = true;
     if (argv.tester) {
         success = await couple(argv.subject, argv.tester);
     } else if (argv.expect) {
@@ -91,5 +91,7 @@ export async function couple(subjectArgs: string, testerArgs: string) {
         }
     }
     
+    // wait for both processes to exit before returning
+    await subject.status();
     return (await tester.status()).success;
 }

@@ -53,15 +53,18 @@ async function expect(file: string, errorPrefix: string, outputTimeout: number) 
     let success = true;
     let curProm: Promise<IteratorResult<string>>, needNewProm = true;
     for (const line of lines) {
-        if (line.startsWith("$$ ")) continue;
-        if (line.startsWith("> ")) {
+        if (line.startsWith("$$ ")) {
+            // ignore (definitely irrelevant here)
+        } else if (line.startsWith("> ")) {
             console.log(line.slice(2)); // write input
         } else if (line.startsWith("#")) {
-            console.warn(line);
+            console.error(line);
         } else {
+            // expecting output
             if (needNewProm) curProm = reader.next();
             const res = await fallback(curProm!, outputTimeout, null);
             if (!res) {
+                // did not get new output after timeout
                 needNewProm = false;
                 console.error("[Expected more output (timeout)]");
                 success = false;
@@ -69,24 +72,26 @@ async function expect(file: string, errorPrefix: string, outputTimeout: number) 
                 needNewProm = true;
                 const { done, value: inLine } = res; // read output
                 if (done) {
+                    // stdin closed -> subject exited
                     console.error("[Subject exited unexpectedly]");
                     success = false;
                     break;
                 } else {
-                    if (line === "<e") {
+                    // got output -> match against expected
+                    if (line === "<e") { // expecting error
                         if (!inLine.startsWith(errorPrefix)) {
                             console.error(`[Expected error (starting with '${errorPrefix}')]`);
                             console.error("[     Got]", inLine);
                             success = false;
                         }
-                    } else if (line.startsWith("<r ")) {
+                    } else if (line.startsWith("<r ")) { // expecting regex
                         const regex = `^${line.slice(3)}$`;
                         if (!inLine.match(new RegExp(regex))) {
                             console.error(`[Expected match to ${regex}]`);
                             console.error("[     Got]", inLine);
                             success = false;
                         }
-                    } else {
+                    } else { // expecting exact match
                         const literalLine = line.replace(/^<l /, "");
                         if (inLine !== literalLine) {
                             console.error("[Expected]", literalLine);
