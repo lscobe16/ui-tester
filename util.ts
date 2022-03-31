@@ -23,7 +23,8 @@ export function fallback<T, S>(prom: Promise<T>, ms: number, value: S) {
 }
 
 export function splitArguments(string: string) {
-    return yargs(("-- " + string) as unknown as any[]).parse()._
+    // the types don't match the functionality here
+    return yargs(("-- " + string) as unknown as string[]).parse()._
         .map((p: string) => ["\"", "'"].includes(p[0]) ? p.slice(1, -1) : p);
 }
 

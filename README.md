@@ -15,6 +15,8 @@ deno install --allow-read ./expect.ts
 deno install --allow-read --allow-write --allow-run ./log.ts
 ```
 
+If you already have them (or scripts with the same name) installed, add the `-f` flag to override them.
+
 ## Test File Syntax
 
 A test file (typically ending in `.test`) uses this syntax (taken
@@ -40,7 +42,7 @@ To use the examples below,
 ### Test
 
 With this script you can use the `-d` flag alongside a directory instead of a single file to execute the command on all
-test files in that folder (no recursion into subfolders). Test files are recognized by the extension provided with the
+test files in that folder (no recursion into subdirectories). Test files are recognized by the extension provided with the
 option `--extension` (default: `.test`).
 
 #### `run`
@@ -77,13 +79,13 @@ Link two processes' `stdin` and `stdout` streams and log their communication.
 coupler --subject "deno run testSubject.ts" --tester "deno run testSubject.ts World"
 ```
 
-> I admit, that using the same programm as the subject and the tester seams confusing at first. The tester is just
+> I admit, that using the same program as the subject and the tester seams confusing at first. The tester is just
 > generating new inputs based on the last output from the subject, which itself responds to the inputs.
 
 For usage with test files you can instead use the built-in `expect` tester:
 
 ```shell
-coupler --subject "deno run testSubject.ts" --expect hello_world.test
+coupler --subject "deno run testSubject.ts" --expect subjectTest_success.test
 ```
 
 #### Expect
