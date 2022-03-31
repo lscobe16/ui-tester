@@ -91,6 +91,8 @@ async function test(filename: string) {
         `deno run --allow-run --allow-read ${COUPLER_SCRIPT} --subject "${argv.subject!}" --expect ${filename}`,
     true);
     
+    // for some (inexplicable) reason order matters here: first await the output
+    const out = decoder.decode(await coupler.output());
     const err = decoder.decode(await coupler.stderrOutput());
     const out = decoder.decode(await coupler.output());
     

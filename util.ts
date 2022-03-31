@@ -28,6 +28,10 @@ export function splitArguments(string: string) {
         .map((p: string) => ["\"", "'"].includes(p[0]) ? p.slice(1, -1) : p);
 }
 
+export function runner(args: string, pipeErr: true): 
+    Deno.Process<{ cmd: string[], cwd: string, stdin: "piped", stdout: "piped", stderr: "piped" }>;
+export function runner(args: string, pipeErr?: false): 
+    Deno.Process<{ cmd: string[], cwd: string, stdin: "piped", stdout: "piped", stderr: "inherit" }>;
 export function runner(args: string, pipeErr = false) {
     return Deno.run({
         cmd: splitArguments(args),
